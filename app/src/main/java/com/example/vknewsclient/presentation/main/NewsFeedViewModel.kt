@@ -1,16 +1,17 @@
-package com.example.vknewsclient
+package com.example.vknewsclient.presentation.main
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.vknewsclient.domain.FeedPost
 import com.example.vknewsclient.domain.StatisticItem
-import com.example.vknewsclient.ui.theme.NewsFeedScreenState
+import com.example.vknewsclient.presentation.news.NewsFeedScreenState
 
 class NewsFeedViewModel : ViewModel() {
     private val sourceList = mutableListOf<FeedPost>().apply {
         repeat(10) {
-            add(FeedPost(id = it))
+            add(FeedPost(id = it,
+                contentText = "Content $it"))
         }
     }
     private val initialState = NewsFeedScreenState.Posts(posts = sourceList)

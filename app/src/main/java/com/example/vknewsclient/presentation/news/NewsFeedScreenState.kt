@@ -1,7 +1,6 @@
-package com.example.vknewsclient.ui.theme
+package com.example.vknewsclient.presentation.news
 
 import com.example.vknewsclient.domain.FeedPost
-import com.example.vknewsclient.domain.PostComment
 
 sealed class NewsFeedScreenState {
     object InitialState : NewsFeedScreenState()

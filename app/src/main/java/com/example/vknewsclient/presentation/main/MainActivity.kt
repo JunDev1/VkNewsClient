@@ -1,11 +1,11 @@
 @file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
-package com.example.vknewsclient
+package com.example.vknewsclient.presentation.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
@@ -26,20 +26,40 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vknewsclient.ui.theme.VkNewsClientTheme
-import com.example.vknewsclient.ui.theme.MainScreen
+import com.vk.api.sdk.VK
+import com.vk.api.sdk.auth.VKScope
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val viewModel: MainViewModel = viewModel()
+            val authState = viewModel.stateAuthScreen.observeAsState(initial = AuthState.Initial)
             VkNewsClientTheme {
-                MainScreen()
+                val authLauncher =
+                    rememberLauncherForActivityResult(contract = VK.getVKAuthActivityResultContract()) {
+                        viewModel.performAuthResult(it)
+                    }
+                when (authState.value) {
+                    is AuthState.Authorized -> {
+                        MainScreen()
+                    }
+                    is AuthState.NotAuthorized -> {
+                        LoginScreen {
+                            authLauncher.launch(listOf(VKScope.WALL))
+                        }
+                    }
+                    else -> {}
+                }
             }
         }
     }

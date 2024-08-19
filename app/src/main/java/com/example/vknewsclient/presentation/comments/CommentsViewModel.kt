@@ -1,4 +1,4 @@
-package com.example.vknewsclient.ui.theme
+package com.example.vknewsclient.presentation.comments
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -22,7 +22,7 @@ class CommentsViewModel(
             }
         }
         _screenState.value = CommentsScreenState.Comments(
-            posts = feedPost, comments = comments
+            feedPost = feedPost, comments = comments
         )
     }
 }

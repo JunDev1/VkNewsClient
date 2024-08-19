@@ -1,4 +1,4 @@
-package com.example.vknewsclient.ui.theme
+package com.example.vknewsclient.presentation.comments
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.vknewsclient.R
 import com.example.vknewsclient.domain.FeedPost
 import com.example.vknewsclient.domain.PostComment
+import com.example.vknewsclient.ui.theme.VkNewsClientTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +50,7 @@ fun CommentsScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(text = "Commets for post Id : ${currentState.posts.id}")
+                        Text(text = "Commets for post Id : ${currentState.feedPost.contentText}")
                     },
                     navigationIcon = {
                         IconButton(onClick = {

@@ -14,6 +14,7 @@ pluginManagement {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        maven { url = uri ("https://artifactory-external.vkpartner.ru/artifactory/vkid-sdk-android/") }
         google()
         mavenCentral()
     }

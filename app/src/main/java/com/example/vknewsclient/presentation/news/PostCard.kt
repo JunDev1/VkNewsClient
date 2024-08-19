@@ -1,4 +1,4 @@
-package com.example.vknewsclient.ui.theme
+package com.example.vknewsclient.presentation.news
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.vknewsclient.R
 import com.example.vknewsclient.domain.FeedPost
@@ -32,7 +33,6 @@ import com.example.vknewsclient.domain.StatisticType
 
 @Composable
 fun PostCard(
-    modifier: Modifier = Modifier,
     feedPost: FeedPost,
     onViewsItemListener: (StatisticItem) -> Unit,
     onLikeClickListener: (StatisticItem) -> Unit,
@@ -188,4 +188,11 @@ private fun IconWithText(
         )
 
     }
+}
+
+@Preview
+@Composable
+fun PostHeaderPreview() {
+    val feedPost = FeedPost()
+    PostHeader(feedPost)
 }

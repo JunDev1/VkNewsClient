@@ -1,6 +1,9 @@
+import org.apache.tools.ant.util.JavaEnvUtils.VERSION_11
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -18,6 +21,13 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        addManifestPlaceholders(mapOf(
+            "VKIDRedirectHost" to "vk.com", // Обычно vk.com.
+            "VKIDRedirectScheme" to "vk{52163582}", // Строго в формате vk{ID приложения}.
+            "VKIDClientID" to "52163582",
+            "VKIDClientSecret" to "IDuxgOIWyvxl6Tdq7XEH"
+        ))
     }
 
     buildTypes {
@@ -32,6 +42,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        isCoreLibraryDesugaringEnabled = true
+
     }
     kotlinOptions {
         jvmTarget = "1.8"
@@ -56,6 +68,14 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.ui)
+    implementation(libs.coil.compose)
+
+    implementation(libs.vkid)
+    implementation(libs.android.sdk.core)
+    implementation(libs.android.sdk.api)
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    implementation ("com.google.code.gson:gson:2.11.0")
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.navigation.compose)
@@ -69,4 +89,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(kotlin("script-runtime"))
 }
