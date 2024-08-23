@@ -75,7 +75,12 @@ dependencies {
     implementation(libs.android.sdk.api)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
-    implementation ("com.google.code.gson:gson:2.11.0")
+
+    implementation (libs.converter.gson)
+    implementation (libs.logging.interceptor)
+
+
+    implementation (libs.gson)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.navigation.compose)

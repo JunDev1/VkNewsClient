@@ -55,59 +55,12 @@ class MainActivity : ComponentActivity() {
                     }
                     is AuthState.NotAuthorized -> {
                         LoginScreen {
-                            authLauncher.launch(listOf(VKScope.WALL))
+                            authLauncher.launch(listOf(VKScope.WALL, VKScope.FRIENDS))
                         }
                     }
                     else -> {}
                 }
             }
         }
-    }
-}
-
-@Composable
-fun CustomScaffold() {
-    val listItem = listOf("Like", "Profile", "Additional")
-    var selectedItem by remember {
-        mutableStateOf(0)
-    }
-    val selectedIcon = listOf(Icons.Filled.Favorite, Icons.Filled.Person, Icons.Filled.Add)
-    val unSelectedIcon = listOf(Icons.Outlined.Favorite, Icons.Outlined.Person, Icons.Outlined.Add)
-    Scaffold(topBar = {
-        TopAppBar(
-            title = {
-                Text(text = "TopAppBarTitle")
-            },
-            navigationIcon = {
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(Icons.Filled.AccountBox, contentDescription = null)
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Black,
-                titleContentColor = Color.White
-            )
-        )
-    },
-        bottomBar = {
-            NavigationBar {
-                listItem.forEachIndexed { index, item ->
-                    NavigationBarItem(
-                        selected = selectedItem == index,
-                        onClick = { selectedItem = index },
-                        icon = {
-                            Icon(
-                                if (selectedItem == index) selectedIcon[index] else unSelectedIcon[index],
-                                contentDescription = item
-                            )
-                        })
-                }
-            }
-        }
-    ) {
-        Text(
-            modifier = Modifier.padding(it),
-            text = "This is Scaffold content"
-        )
     }
 }

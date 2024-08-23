@@ -44,7 +44,6 @@ fun NewsFeedScreen(
                 onCommentClickListener = onCommentClickListener
             )
         }
-
         NewsFeedScreenState.InitialState -> {}
     }
 }
@@ -95,7 +94,6 @@ private fun FeedPosts(
                             .fillMaxSize()
                             .background(Color.Red) // Например, красный фон для удаления
                     )
-
                 },
                 content = {
                     PostCard(
@@ -107,7 +105,7 @@ private fun FeedPosts(
                             viewModel.updateCount(instagramItem, it)
                         },
                         onLikeClickListener = {
-                            viewModel.updateCount(instagramItem, it)
+                            viewModel.changeLikeStatus(instagramItem)
                         },
                         onCommentClickListener = {
                             onCommentClickListener(instagramItem)

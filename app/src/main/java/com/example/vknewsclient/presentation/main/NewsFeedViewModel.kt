@@ -1,22 +1,41 @@
 package com.example.vknewsclient.presentation.main
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.vknewsclient.data.model.repository.NewsFeedRepository
 import com.example.vknewsclient.domain.FeedPost
 import com.example.vknewsclient.domain.StatisticItem
 import com.example.vknewsclient.presentation.news.NewsFeedScreenState
+import kotlinx.coroutines.launch
 
-class NewsFeedViewModel : ViewModel() {
-    private val sourceList = mutableListOf<FeedPost>().apply {
-        repeat(10) {
-            add(FeedPost(id = it,
-                contentText = "Content $it"))
-        }
-    }
-    private val initialState = NewsFeedScreenState.Posts(posts = sourceList)
+class NewsFeedViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val initialState = NewsFeedScreenState.InitialState
     private val _screenState = MutableLiveData<NewsFeedScreenState>(initialState)
     val screenState: LiveData<NewsFeedScreenState> = _screenState
+
+    private val repository = NewsFeedRepository(application)
+
+    init {
+        loadRecommendations()
+    }
+
+    private fun loadRecommendations() {
+        viewModelScope.launch {
+            val feedPost = repository.loadRecommendation()
+            _screenState.value = NewsFeedScreenState.Posts(feedPost)
+        }
+    }
+
+    fun changeLikeStatus(feedPost: FeedPost) {
+        viewModelScope.launch {
+            repository.changeLikeStatus(feedPost)
+            _screenState.value = NewsFeedScreenState.Posts(posts = repository.feedPosts)
+        }
+    }
 
     fun updateCount(feedPost: FeedPost, item: StatisticItem) {
         val currentState = screenState.value
@@ -48,6 +67,7 @@ class NewsFeedViewModel : ViewModel() {
         }
         _screenState.value = NewsFeedScreenState.Posts(newPosts)
     }
+
     fun remove(feedPost: FeedPost) {
         val currentState = screenState.value
         if (currentState !is NewsFeedScreenState.Posts) return
