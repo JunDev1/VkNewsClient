@@ -1,28 +1,20 @@
 package com.example.vknewsclient.presentation.comments
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
+import android.app.Application
 import androidx.lifecycle.ViewModel
-import com.example.vknewsclient.domain.FeedPost
-import com.example.vknewsclient.domain.PostComment
+import com.example.vknewsclient.data.model.repository.NewsFeedRepositoryImpl
+import com.example.vknewsclient.domain.entity.repository.NewsFeedRepository
+import com.example.vknewsclient.domain.entity.FeedPost
+import com.example.vknewsclient.domain.entity.usecases.GetCommentsUseCase
+import kotlinx.coroutines.flow.map
 
 class CommentsViewModel(
-    feedPost: FeedPost
+    feedPost: FeedPost,
+    application: Application,
 ) : ViewModel() {
-    private val _screenState =  MutableLiveData<CommentsScreenState>(CommentsScreenState.InitialState)
-    val screenState : LiveData<CommentsScreenState> = _screenState
-
-    init {
-        loadComments(feedPost)
-    }
-    fun loadComments(feedPost: FeedPost) {
-        val comments = mutableListOf<PostComment>().apply {
-            repeat(20){
-                add(PostComment(id = it))
-            }
-        }
-        _screenState.value = CommentsScreenState.Comments(
-            feedPost = feedPost, comments = comments
-        )
-    }
+    private val repository = NewsFeedRepositoryImpl(application)
+    private val getCommentsUseCase = GetCommentsUseCase(repository)
+    val screenState =
+        getCommentsUseCase(feedPost)
+            .map { CommentsScreenState.Comments(comments = it, feedPost = feedPost) }
 }

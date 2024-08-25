@@ -1,78 +1,69 @@
 package com.example.vknewsclient.presentation.main
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.vknewsclient.data.model.repository.NewsFeedRepository
-import com.example.vknewsclient.domain.FeedPost
-import com.example.vknewsclient.domain.StatisticItem
+import com.example.vknewsclient.data.model.repository.NewsFeedRepositoryImpl
+import com.example.vknewsclient.domain.entity.repository.NewsFeedRepository
+import com.example.vknewsclient.domain.entity.FeedPost
+import com.example.vknewsclient.domain.entity.usecases.ChangeLikeStatusUseCase
+import com.example.vknewsclient.domain.entity.usecases.DeletePostUseCase
+import com.example.vknewsclient.domain.entity.usecases.GetRecommendationsUseCase
+import com.example.vknewsclient.domain.entity.usecases.LoadNextDataUseCase
+import com.example.vknewsclient.extensions.mergeWith
 import com.example.vknewsclient.presentation.news.NewsFeedScreenState
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 
 class NewsFeedViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val initialState = NewsFeedScreenState.InitialState
-    private val _screenState = MutableLiveData<NewsFeedScreenState>(initialState)
-    val screenState: LiveData<NewsFeedScreenState> = _screenState
-
-    private val repository = NewsFeedRepository(application)
-
-    init {
-        loadRecommendations()
+    private val repository = NewsFeedRepositoryImpl(application)
+    private val exceptionHandler = CoroutineExceptionHandler{_,_, ->
+        Log.d("NewsFeedViewModel", "Exception caught by exception handler")
     }
+    private val getRecommendationsUseCase = GetRecommendationsUseCase(repository)
+    private val loadNextDataUseCase = LoadNextDataUseCase(repository)
+    private val changeLikeStatusUseCase = ChangeLikeStatusUseCase(repository)
+    private val deletePostUseCase = DeletePostUseCase(repository)
+    private val recommendationFlow = getRecommendationsUseCase()
+    private val loadNextDataEvents = MutableSharedFlow<Unit>()
+    private val loadNextDataFlow = flow {
+        loadNextDataEvents.collect {
+            emit(NewsFeedScreenState.Posts(
+                posts = recommendationFlow.value,
+                nextDataIsLoading = true
+            ))
+        }
+    }
+    val screenState = getRecommendationsUseCase()
+        .filter { it.isNotEmpty() }
+        .map { NewsFeedScreenState.Posts(it) as NewsFeedScreenState }
+        .onStart { emit(NewsFeedScreenState.Loading) }
+        .mergeWith(loadNextDataFlow)
 
-    private fun loadRecommendations() {
+
+    fun loadNextRecommendations() {
         viewModelScope.launch {
-            val feedPost = repository.loadRecommendation()
-            _screenState.value = NewsFeedScreenState.Posts(feedPost)
+            loadNextDataEvents.emit(Unit)
+            loadNextDataUseCase()
         }
     }
 
     fun changeLikeStatus(feedPost: FeedPost) {
-        viewModelScope.launch {
-            repository.changeLikeStatus(feedPost)
-            _screenState.value = NewsFeedScreenState.Posts(posts = repository.feedPosts)
+        viewModelScope.launch(exceptionHandler) {
+            changeLikeStatusUseCase(feedPost)
         }
-    }
-
-    fun updateCount(feedPost: FeedPost, item: StatisticItem) {
-        val currentState = screenState.value
-        if (currentState !is NewsFeedScreenState.Posts) return
-        val oldPost = currentState.posts.toMutableList()
-        val oldStatistics = feedPost.statistics
-        val newStatistics = oldStatistics.toMutableList().apply {
-            replaceAll { oldItem ->
-                if (oldItem.type == item.type) {
-                    oldItem.copy(
-                        count = oldItem.count + 1
-                    )
-                } else {
-                    oldItem
-                }
-            }
-        }
-        val newFeedPost = feedPost.copy(
-            statistics = newStatistics
-        )
-        val newPosts = oldPost.apply {
-            replaceAll {
-                if (it.id == newFeedPost.id) {
-                    newFeedPost
-                } else {
-                    it
-                }
-            }
-        }
-        _screenState.value = NewsFeedScreenState.Posts(newPosts)
     }
 
     fun remove(feedPost: FeedPost) {
-        val currentState = screenState.value
-        if (currentState !is NewsFeedScreenState.Posts) return
-        val oldPost = currentState.posts.toMutableList()
-        oldPost.remove(feedPost)
-        _screenState.value = NewsFeedScreenState.Posts(oldPost)
+        viewModelScope.launch(exceptionHandler) {
+            deletePostUseCase(feedPost)
+        }
     }
 }

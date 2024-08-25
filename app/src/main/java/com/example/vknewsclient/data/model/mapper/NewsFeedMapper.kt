@@ -1,9 +1,11 @@
 package com.example.vknewsclient.data.model.mapper
 
+import com.example.vknewsclient.data.model.CommentsResponseDto
 import com.example.vknewsclient.data.model.NewsFeedResponseDto
-import com.example.vknewsclient.domain.FeedPost
-import com.example.vknewsclient.domain.StatisticItem
-import com.example.vknewsclient.domain.StatisticType
+import com.example.vknewsclient.domain.entity.FeedPost
+import com.example.vknewsclient.domain.entity.PostComment
+import com.example.vknewsclient.domain.entity.StatisticItem
+import com.example.vknewsclient.domain.entity.StatisticType
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -22,7 +24,7 @@ class NewsFeedMapper {
                 id = post.id,
                 communityId = post.communityId,
                 communityName = group.name,
-                publicationDate = mapTimeTempToDate(post.date * 1000),
+                publicationDate = mapTimeTempToDate(post.date),
                 communityImageUrl = group.imageUrl,
                 contentText = post.text,
                 contentImageUrl = post.attachment?.firstOrNull()?.photo?.photoUrls?.lastOrNull()?.url,
@@ -38,8 +40,28 @@ class NewsFeedMapper {
         }
         return result
     }
-    private fun mapTimeTempToDate(timestamp : Long): String {
-        val date = Date(timestamp)
+
+    private fun mapTimeTempToDate(timestamp: Long): String {
+        val date = Date(timestamp * 1000)
         return SimpleDateFormat("d MMMM yyyy, hh:mm", Locale.getDefault()).format(date)
+    }
+
+    fun mapResponseToComments(responseDto: CommentsResponseDto): List<PostComment> {
+        val result = mutableListOf<PostComment>()
+        val comments = responseDto.content.comments
+        val profiles = responseDto.content.profiles
+        for (comment in comments) {
+            if (comment.text.isBlank()) continue
+            val author = profiles.firstOrNull { it.id == comment.authorId } ?: continue
+            val postComment = PostComment(
+                id = comment.id,
+                authorName = "${author.firstName} ${author.lastName}",
+                authorAvatarUrl = author.avatarUrl,
+                commentText = comment.text,
+                publicationDate = mapTimeTempToDate(comment.date)
+            )
+            result.add(postComment)
+        }
+        return result
     }
 }
