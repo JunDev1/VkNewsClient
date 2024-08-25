@@ -20,11 +20,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.example.vknewsclient.R
+import com.example.vknewsclient.presentation.ViewModelFactory
 import com.example.vknewsclient.ui.theme.DarkBlue
 
 @Composable
 fun LoginScreen(
-    onLoginClick : () -> Unit
+    onLoginClick : () -> Unit,
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),

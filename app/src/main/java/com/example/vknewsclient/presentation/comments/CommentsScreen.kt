@@ -1,6 +1,5 @@
 package com.example.vknewsclient.presentation.comments
 
-import android.app.Application
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -38,6 +37,8 @@ import coil.compose.AsyncImage
 import com.example.vknewsclient.R
 import com.example.vknewsclient.domain.entity.FeedPost
 import com.example.vknewsclient.domain.entity.PostComment
+import com.example.vknewsclient.presentation.NewsFeedApplication
+import com.example.vknewsclient.presentation.ViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,12 +46,12 @@ fun CommentsScreen(
     onBackPressed: () -> Unit,
     feedPost: FeedPost,
 ) {
+    val component =
+        (LocalContext.current.applicationContext as NewsFeedApplication).component.getCommentsScreenComponentFactory()
+            .create(feedPost)
     val viewModel: CommentsViewModel =
         viewModel(
-            factory = CommentsViewModelFactory(
-                feedPost = feedPost,
-                application = LocalContext.current.applicationContext as Application
-            )
+            factory = component.getViewModelFactory()
         )
     val screenState = viewModel.screenState.collectAsState(CommentsScreenState.InitialState)
     val currentState = screenState.value
@@ -105,7 +106,9 @@ private fun CommentItem(comment: PostComment) {
     ) {
         AsyncImage(
             model = comment.authorAvatarUrl,
-            modifier = Modifier.size(48.dp).clip(CircleShape),
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape),
             contentDescription = null,
         )
         Spacer(modifier = Modifier.width(8.dp))

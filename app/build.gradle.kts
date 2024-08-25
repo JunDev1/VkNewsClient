@@ -1,9 +1,8 @@
-import org.apache.tools.ant.util.JavaEnvUtils.VERSION_11
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("kotlin-parcelize")
+    id ("kotlin-kapt")
 }
 
 android {
@@ -75,6 +74,8 @@ dependencies {
     implementation(libs.android.sdk.api)
     coreLibraryDesugaring(libs.desugar.jdk.libs)
 
+    implementation (libs.dagger)
+    kapt (libs.dagger.compiler)
 
     implementation (libs.converter.gson)
     implementation (libs.logging.interceptor)
